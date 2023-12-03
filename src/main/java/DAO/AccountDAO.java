@@ -14,12 +14,6 @@ public class AccountDAO {
 
     public Account registerAccount(Account account)
     {
-        // Username must not be blank and password length must be <= 4
-        if (account.username == "" || account.password.length() < 4)
-        {
-            return null;
-        }
-
         Connection conn = ConnectionUtil.getConnection();
 
         try 

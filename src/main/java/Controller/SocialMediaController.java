@@ -3,6 +3,9 @@ package Controller;
 import Service.AccountService;
 import Service.MessageService;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,6 +27,12 @@ public class SocialMediaController {
         app.post("/register", this::registerHandler);
         app.post("/login", this::loginHandler);
         app.post("/messages", this::postMessageHandler);
+        app.get("/messages", this::getAllMessagesHandler);
+        app.get("/messages/<id>", this::getMessageByIdHandler);
+        app.get("/accounts/<id>/messages", this::getAllByUserIdHandler);
+        app.delete("/messages/<id>", this::deleteMessageHandler);
+        app.patch("/messages/<id>", this::updateMessageHandler);
+
 
         return app;
     }
@@ -73,4 +82,38 @@ public class SocialMediaController {
         }
     }
 
+    private void getAllMessagesHandler(Context context) throws JsonProcessingException {
+        ArrayList<Message> messages = messageService.getAll();
+        context.json(messages, Message.class);
+    }
+
+    private void getMessageByIdHandler(Context context) {
+        Message message = messageService.getByID(Integer.valueOf(context.pathParam("id")));
+        if (message != null) {
+            context.json(message, Message.class);
+        }
+    }
+
+    private void deleteMessageHandler(Context context) {
+        Message message = messageService.getByID(Integer.valueOf(context.pathParam("id")));
+        if (message != null) {
+            context.json(message, Message.class);
+        }
+    }
+
+    private void updateMessageHandler(Context context) throws JsonProcessingException{
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, String> body = mapper.readValue(context.body(), Map.class);
+        Message message = messageService.update(Integer.valueOf(context.pathParam("id")), body.get("message_text"));
+        if (message != null) {
+            context.json(message, Message.class);
+        } else {
+            context.status(400);
+        }
+    }
+
+    private void getAllByUserIdHandler(Context context) {
+        ArrayList<Message> messages = messageService.getByUserId(Integer.valueOf(context.pathParam("id")));
+        context.json(messages, Message.class);
+    }
 }
